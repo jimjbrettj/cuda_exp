@@ -1,5 +1,16 @@
  #include <stdio.h>
 
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+   if (code != cudaSuccess) 
+   {
+      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
+}
+
+
 /*
 Common workflow of cuda programs:
     1) Allocate host memory and initialized host data
@@ -28,14 +39,15 @@ int main(){
     a = 3;
     b = 4;
     // Allocate device memory
-    cudaMalloc((void**) &dev_c, sizeof(int));
+    gpuErrchk(cudaMalloc((void**) &dev_c, sizeof(int)));
     // Execute kernels
-    //cuda_hello<<<1,1>>>();
+    cuda_hello<<<1,1>>>();
     //test<<<1,1>>>(a, dev_c);
-    add<<<1,1>>>(a, b, dev_c);
+   // add<<<1,1>>>(a, b, dev_c);
     // Transfer output from device memory to host
     cudaMemcpy(&c, dev_c, sizeof(int), cudaMemcpyDeviceToHost);
     printf("%d + %d = %d\n", a, b, c);
+    gpuErrchk( cudaPeekAtLastError() );
     // Free device memory
     cudaFree(dev_c);
     return 0;
