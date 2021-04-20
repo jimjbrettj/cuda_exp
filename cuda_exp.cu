@@ -42,8 +42,10 @@ int main(){
     gpuErrchk(cudaMalloc((void**) &dev_c, sizeof(int)));
     // Execute kernels
     cuda_hello<<<1,1>>>();
+
+    cudaDeviceSynchronize();
     //test<<<1,1>>>(a, dev_c);
-   // add<<<1,1>>>(a, b, dev_c);
+    add<<<1,1>>>(a, b, dev_c);
     // Transfer output from device memory to host
     cudaMemcpy(&c, dev_c, sizeof(int), cudaMemcpyDeviceToHost);
     printf("%d + %d = %d\n", a, b, c);
